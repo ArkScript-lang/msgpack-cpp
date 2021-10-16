@@ -178,7 +178,6 @@ msgpack_unpack_func(int, _execute)(msgpack_unpack_struct(_context)* ctx, const c
         do {
             switch(cs) {
             case MSGPACK_CS_HEADER:
-#pragma GCC diagnostic ignored "-Wgnu-case-range"
 #pragma GCC diagnostic ignored "-Wpedantic"
                 SWITCH_RANGE_BEGIN
                 SWITCH_RANGE(0x00, 0x7f)  // Positive Fixnum
@@ -186,7 +185,6 @@ msgpack_unpack_func(int, _execute)(msgpack_unpack_struct(_context)* ctx, const c
                 SWITCH_RANGE(0xe0, 0xff)  // Negative Fixnum
                     push_fixed_value(_int8, *(int8_t*)p);
                 SWITCH_RANGE(0xc0, 0xdf)  // Variable
-#pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
                     switch(*p) {
                     case 0xc0:  // nil
@@ -237,7 +235,6 @@ msgpack_unpack_func(int, _execute)(msgpack_unpack_struct(_context)* ctx, const c
                     default:
                         goto _failed;
                     }
-#pragma GCC diagnostic ignored "-Wgnu-case-range"
 #pragma GCC diagnostic ignored "-Wpedantic"
                 SWITCH_RANGE(0xa0, 0xbf)  // FixStr
                     again_fixed_trail_if_zero(MSGPACK_ACS_STR_VALUE, ((unsigned int)*p & 0x1f), _str_zero);
@@ -251,14 +248,14 @@ msgpack_unpack_func(int, _execute)(msgpack_unpack_struct(_context)* ctx, const c
                 SWITCH_RANGE_END
                 // end MSGPACK_CS_HEADER
 #pragma GCC diagnostic pop
-#pragma GCC diagnostic pop
 
 
             _fixed_trail_again:
                 ++p;
-                [[fallthrough]];
+                goto _default_action;
 
             default:
+                _default_action:
                 if((size_t)(pe - p) < trail) { goto _out; }
                 n = p;  p += trail - 1;
                 switch(cs) {
