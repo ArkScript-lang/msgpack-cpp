@@ -607,21 +607,36 @@ object::object(const T& v, msgpack::zone* z)
 
 inline object::object(const msgpack_object& o)
 {
-    // FIXME beter way?
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+    // FIXME better way?
+    // Probably. But it will take some refactoring as there is ownership issues to resolve.
+
+    // For now the next three objects.
+    static_assert(sizeof(object) == sizeof(msgpack_object));
     std::memcpy(this, &o, sizeof(o));
+#pragma GCC diagnostic pop
 }
 
 inline void operator<< (msgpack::object& o, const msgpack_object& v)
 {
-    // FIXME beter way?
-    std::memcpy(&o, &v, sizeof(v));
+    // Use the constructor above.
+    // So the code is only in one place.
+
+    // First end the lifetime of the object correctly.
+    o.~object();
+    // Then use placement new to restart the lifetime of the object
+    // and construct the object correctly.
+    new (&o) msgpack::object(v);
 }
 
 inline object::operator msgpack_object() const
 {
-    // FIXME beter way?
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+    // FIXME better way?
+    // Probably. But it will take some refactoring as there is ownership issues to resolve.
     msgpack_object obj;
     std::memcpy(&obj, this, sizeof(obj));
+#pragma GCC diagnostic pop
     return obj;
 }
 
