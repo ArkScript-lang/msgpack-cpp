@@ -178,12 +178,14 @@ msgpack_unpack_func(int, _execute)(msgpack_unpack_struct(_context)* ctx, const c
         do {
             switch(cs) {
             case MSGPACK_CS_HEADER:
+#pragma GCC diagnostic ignored "-Wgnu-case-range"
                 SWITCH_RANGE_BEGIN
                 SWITCH_RANGE(0x00, 0x7f)  // Positive Fixnum
                     push_fixed_value(_uint8, *(uint8_t*)p);
                 SWITCH_RANGE(0xe0, 0xff)  // Negative Fixnum
                     push_fixed_value(_int8, *(int8_t*)p);
                 SWITCH_RANGE(0xc0, 0xdf)  // Variable
+#pragma GCC diagnostic pop
                     switch(*p) {
                     case 0xc0:  // nil
                         push_simple_value(_nil);
@@ -233,6 +235,7 @@ msgpack_unpack_func(int, _execute)(msgpack_unpack_struct(_context)* ctx, const c
                     default:
                         goto _failed;
                     }
+#pragma GCC diagnostic ignored "-Wgnu-case-range"
                 SWITCH_RANGE(0xa0, 0xbf)  // FixStr
                     again_fixed_trail_if_zero(MSGPACK_ACS_STR_VALUE, ((unsigned int)*p & 0x1f), _str_zero);
                 SWITCH_RANGE(0x90, 0x9f)  // FixArray
@@ -244,6 +247,7 @@ msgpack_unpack_func(int, _execute)(msgpack_unpack_struct(_context)* ctx, const c
                     goto _failed;
                 SWITCH_RANGE_END
                 // end MSGPACK_CS_HEADER
+#pragma GCC diagnostic pop
 
 
             _fixed_trail_again:
